@@ -1,0 +1,64 @@
+# docker-compose-swarm.yml (для локальных образов)
+version: '3.8'
+
+services:
+  nginx:
+    image: microservices-project_nginx  # Или другое имя вашего образа
+    ports:
+      - "80:80"
+    networks:
+      - microservices-overlay
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  service1:
+    image: microservices-project_service1  # Ваше локальное имя образа
+    networks:
+      - microservices-overlay
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  service2:
+    image: microservices-project_service2  # Ваше локальное имя образа
+    networks:
+      - microservices-overlay
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  microservices-overlay:
+    external: true
