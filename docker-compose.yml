@@ -1,0 +1,21 @@
+# docker-compose.yml - ИСПРАВЛЕННАЯ ВЕРСИЯ
+services:
+  service1:
+    build: ./service1
+    ports:
+      - "5000:5000"
+    networks:
+      - microservices-network
+    depends_on:
+      - service2
+
+  service2:
+    build: ./service2
+    ports:
+      - "5001:5001"
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    driver: bridge
